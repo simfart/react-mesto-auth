@@ -9,6 +9,10 @@ import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import ConfirmPopup from './ConfirmPopup';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import Register from './Register';
+import Login from './Login';
+import InfoTooltip from './InfoTooltip';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -165,6 +169,13 @@ function App() {
     <CurrentUserContext.Provider value={currentUser}>
       <div className="body">
         <div className="page">
+
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/sign-up" element={<Register />}> </Route>
+            <Route path="/sign-in" element={<Login />} />
+          </Routes>
+          {/*
           <Header />
           <Main
             onEditProfile={openProfilePopup}
@@ -175,7 +186,7 @@ function App() {
             onCardLike={handleCardLike}
             cards={cards}
           />
-          <Footer />
+          <Footer /> */}
           <EditProfilePopup
             isOpen={isEditProfilePopupOpen}
             onClose={closeAllPopups}
