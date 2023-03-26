@@ -1,7 +1,10 @@
 import React from 'react';
 import PopupWithForm from './PopupWithForm';
+import { useForm } from '../hooks/useForm';
 
 function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar, isLoading }) {
+
+  const { handleChange, isValid, setIsValid, errors, setErrors } = useForm({});
 
   const avatarRef = React.useRef();
 
@@ -15,8 +18,10 @@ function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar, isLoading }) {
   }
 
   React.useEffect(() => {
-    avatarRef.current.value = ''
-  }, [isOpen]);
+    avatarRef.current.value = '';
+    setErrors({});
+    setIsValid(true)
+  }, [isOpen, setErrors, setIsValid]);
 
   return (
     <PopupWithForm
@@ -26,17 +31,19 @@ function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar, isLoading }) {
       popunName="update_avatar"
       buttonText={isLoading ? "Сохранение..." : "Обновить"}
       onSubmit={handleSubmit}
+      isValid={isValid}
     >
       <input
         id="Avatar-input"
         type="url"
-        className="popup__item popup__item_el_cardLink"
-        name="avatarLink"
+        className={`popup__item ${isValid ? "" : "popup__item_error"}`}
+        name="link"
         placeholder="Ссылка на картинку"
         required
         ref={avatarRef}
+        onChange={handleChange}
       />
-      <span id="Avatar-input-error" className="popup__error"></span>
+      <span className="popup__error">{errors.link || ''}</span>
     </PopupWithForm>
   );
 }

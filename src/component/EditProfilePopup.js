@@ -6,7 +6,7 @@ import { useForm } from '../hooks/useForm';
 
 function EditProfilePopup({ isOpen, onClose, onUpdateUser, isLoading }) {
 
-  const { values, handleChange, setValues } = useForm({});
+  const { values, handleChange, setValues, isValid, setIsValid, errors, setErrors } = useForm({});
   const currentUser = React.useContext(CurrentUserContext);
 
   React.useEffect(() => {
@@ -14,7 +14,9 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser, isLoading }) {
       name: currentUser.name,
       about: currentUser.about
     });
-  }, [currentUser, isOpen, setValues]);
+    setErrors({});
+    setIsValid(true);
+  }, [currentUser, isOpen, setValues, setErrors, setIsValid]);
 
   function handleSubmit(e) {
     // Запрещаем браузеру переходить по адресу формы
@@ -34,31 +36,32 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser, isLoading }) {
       popunName="add_profile"
       buttonText={isLoading ? "Сохранение..." : "Сохранить"}
       onSubmit={handleSubmit}
+      isValid={isValid}
     >
       <input
         value={values.name || ''}
         onChange={handleChange}
         id="heading-input"
         type="text"
-        className="popup__item popup__item_el_heading"
+        className={`popup__item ${isValid ? "" : "popup__item_error"}`}
         name="name"
         minLength="2"
         maxLength="40"
         required
       />
-      <span id="heading-input-error" className="popup__error"></span>
+      <span className="popup__error">{errors.name || ''}</span>
       <input
         value={values.about || ''}
         onChange={handleChange}
         id="subheading-input"
         type="text"
-        className="popup__item popup__item_el_subheading"
+        className={`popup__item ${isValid ? "" : "popup__item_error"}`}
         name="about"
         minLength="2"
         maxLength="200"
         required
       />
-      <span id="subheading-input-error" className="popup__error"></span>
+      <span className="popup__error">{errors.about || ''}</span>
     </PopupWithForm>
   );
 }

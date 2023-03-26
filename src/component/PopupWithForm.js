@@ -7,7 +7,9 @@ function PopupWithForm({
   children,
   isOpen,
   onClose,
-  onSubmit
+  onSubmit,
+  isValid
+
 }) {
 
   return (
@@ -16,10 +18,10 @@ function PopupWithForm({
       name={`popup_${popunName}`}
     >
       <div className="popup__conteiner popup__conteiner-open">
-        <form className="popup__form" onSubmit={onSubmit}>
+        <form className="popup__form" onSubmit={onSubmit} noValidate>
           <h2 className="popup__title">{popupTitle}</h2>
           <fieldset className="popup__info">{children}</fieldset>
-          <button className="popup__button" type="submit" aria-label="Сохранить">
+          <button className={`popup__button ${isValid ? "" : "popup__button_invalid"}`} type="submit" aria-label="Сохранить">
             {buttonText}
           </button>
         </form>

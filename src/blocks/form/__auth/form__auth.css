@@ -25,6 +25,10 @@
   color: #ffffff;
 }
 
+.form-auth__item_error {
+  border-bottom: 1px solid #fe0404;
+}
+
 /* .form-auth__item:active,
 :hover,
 :focus {
