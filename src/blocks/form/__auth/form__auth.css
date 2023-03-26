@@ -25,13 +25,13 @@
   color: #ffffff;
 }
 
-.form-auth__item:active,
+/* .form-auth__item:active,
 :hover,
 :focus {
   outline: 0;
   outline-offset: 0;
   color: #cccccc;
-}
+} */
 
 .form-auth__button {
   width: 100%;

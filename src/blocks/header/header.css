@@ -1,3 +1,34 @@
-.header{
-    border-bottom: 1px solid rgba(84, 84, 84, 0.7);
+.header {
+  border-bottom: 1px solid rgba(84, 84, 84, 0.7);
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  line-height: 22px;
+  color: #ffffff;
+}
+.header__conteiner {
+  display: flex;
+  align-items: center;
+}
+.header__button {
+  text-align: center;
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+  color: #ffffff;
+}
+
+.header__button:hover {
+  opacity: 0.6;
+}
+
+.header__email {
+  font-weight: 500;
+  margin: 0 24px 0;
+}
+.form-auth__sing-in {
+  text-decoration: none;
+  color: #ffffff;
+}
+.form-auth__sing-in:hover {
+  opacity: 0.6;
 }

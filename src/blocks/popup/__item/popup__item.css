@@ -4,7 +4,8 @@
   width: 100%;
   font-size: 14px;
   line-height: 17px;
-  padding: 0 0 5px 0;
+  padding: 9px 0;
+  margin-bottom: 3px;
 }
 
 .popup__item:active,
