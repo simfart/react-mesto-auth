@@ -25,7 +25,6 @@ function PopupWithForm({
             {buttonText}
           </button>
         </form>
-
         <button
           onClick={onClose}
           className="popup__close"

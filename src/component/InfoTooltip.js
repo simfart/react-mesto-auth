@@ -1,7 +1,6 @@
 import React from 'react';
 import union from '../images/Union.svg';
 import unionred from '../images/Union-red.svg';
-import PopupWithForm from './PopupWithForm';
 
 function InfoTooltip({ isOpen, onClose, registered }) {
   return (

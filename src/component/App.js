@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
 import api from "../utils/Api";
@@ -10,10 +9,10 @@ import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
 import ConfirmPopup from "./ConfirmPopup";
+import Loader from "./Loader";
 import {
   Route,
   Routes,
-  Navigate,
   useNavigate,
 } from "react-router-dom";
 import Register from "./Register";
@@ -40,14 +39,15 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState("");
-  const [isLoading, setLoading] = useState(true);
+  const [isLoad, setIsLoad] = useState(false);
+
 
   const isOpen =
     isEditAvatarPopupOpen ||
     isEditProfilePopupOpen ||
     isAddPlacePopupOpen ||
     selectedCard ||
-    isInfoTooltipOpen;
+    isInfoTooltipOpen
 
   useEffect(() => {
     function closeByEscape(evt) {
@@ -70,6 +70,7 @@ function App() {
       };
     }
   }, [isOpen]);
+
 
   // Данные из API
   useEffect(() => {
@@ -116,8 +117,6 @@ function App() {
     setIsInfoTooltipOpen(!isInfoTooltipOpen)
   }
 
-
-
   function handleCardLike(card) {
     // Снова проверяем, есть ли уже лайк на этой карточке
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
@@ -129,7 +128,7 @@ function App() {
         );
       })
       .catch((err) => {
-        console.log(err); // выведем ошибку в консоль
+        console.log(err);
       });
   }
 
@@ -137,6 +136,7 @@ function App() {
     setSelectedCardToDelete(card);
     setIsConfirmPopupOpen(!isConfirmPopupOpen);
   }
+
   // удаление карточки
   function handleCardDelete(card) {
     setLoad(true);
@@ -147,12 +147,13 @@ function App() {
         closeAllPopups();
       })
       .catch((err) => {
-        console.log(err); // выведем ошибку в консоль
+        console.log(err);
       })
       .finally(() => {
         setLoad(false);
       });
   }
+
   //Редактирование профиля
   function handleUpdateUser(values) {
     setLoad(true);
@@ -162,14 +163,14 @@ function App() {
         closeAllPopups();
       })
       .catch((err) => {
-        console.log("здесь ошибка", err); // выведем ошибку в консоль
+        console.log("здесь ошибка", err);
       })
       .finally(() => {
         setLoad(false);
       });
   }
-  //Редактирование аватара
 
+  //Редактирование аватара
   function handleUpdateAvatar(values) {
     setLoad(true);
     api.editAvatar(values)
@@ -178,12 +179,13 @@ function App() {
         closeAllPopups();
       })
       .catch((err) => {
-        console.log("здесь ошибка", err); // выведем ошибку в консоль
+        console.log("здесь ошибка", err);
       })
       .finally(() => {
         setLoad(false);
       });
   }
+
   // Добавление карточек
   function handleAddPlaceSubmit(data) {
     setLoad(true);
@@ -193,7 +195,7 @@ function App() {
         closeAllPopups();
       })
       .catch((err) => {
-        console.log(err); // выведем ошибку в консоль
+        console.log(err);
       })
       .finally(() => {
         setLoad(false);
@@ -208,11 +210,13 @@ function App() {
         navigate("/singin", { replace: true });
       })
       .catch((err) => {
-        console.log("здесь ошибка", err); // выведем ошибку в консоль
+        console.log("здесь ошибка", err);
         setIsRegistered(false);
-        openInfoTooltip()
+        openInfoTooltip();
       })
-      .finally(setLoading(false))
+      .finally(() => {
+        setIsLoad(false);
+      });
   }, [])
 
   // Вход
@@ -231,14 +235,13 @@ function App() {
     } catch (e) {
       console.log(e)
     } finally {
-      setLoading(false)
+      setIsLoad(false);
     }
   }, [])
 
   // Проверка токена
   const handleTokenCheck = useCallback(() => {
     const jwt = localStorage.getItem("jwt");
-    // проверим токен
     if (jwt) {
       auth.checkToken(jwt)
         .then((res) => {
@@ -249,9 +252,11 @@ function App() {
           }
         })
         .catch((err) => {
-          console.log("здесь ошибка", err); // выведем ошибку в консоль
+          console.log("здесь ошибка", err);
         })
-        .finally(setLoading(false));
+        .finally(() => {
+          setIsLoad(false);
+        });
     }
   }, []);
 
@@ -259,7 +264,9 @@ function App() {
     handleTokenCheck();
   }, []);
 
-
+  if (isLoad) {
+    return <Loader />
+  }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
