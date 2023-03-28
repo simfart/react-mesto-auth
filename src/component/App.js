@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Header from "./Header";
 import Main from "./Main";
 import Footer from "./Footer";
@@ -15,7 +15,6 @@ import {
   Routes,
   Navigate,
   useNavigate,
-  Link,
 } from "react-router-dom";
 import Register from "./Register";
 import Login from "./Login";
@@ -36,7 +35,12 @@ function App() {
 
   const [load, setLoad] = useState(false);
 
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(true);
+
+  const [loggedIn, setLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  const [userEmail, setUserEmail] = useState("");
+  const [isLoading, setLoading] = useState(true);
 
   const isOpen =
     isEditAvatarPopupOpen ||
@@ -44,8 +48,6 @@ function App() {
     isAddPlacePopupOpen ||
     selectedCard ||
     isInfoTooltipOpen;
-
-  const [loginData, setloginData] = useState({});
 
   useEffect(() => {
     function closeByEscape(evt) {
@@ -69,6 +71,20 @@ function App() {
     }
   }, [isOpen]);
 
+  // Данные из API
+  useEffect(() => {
+    if (loggedIn) {
+      Promise.all([api.getInitialUserInfo(), api.getInitialUserCards()])
+        .then(([resUserInfo, resCards]) => {
+          setCurrentUser(resUserInfo);
+          setCards(resCards);
+        })
+        .catch((err) => {
+          console.log(err); // выведем ошибку в консоль
+        });
+    }
+  }, [loggedIn]);
+
   //Закрытие всех попапов по Х
   function closeAllPopups() {
     setIsEditProfilePopupOpen(false);
@@ -88,31 +104,25 @@ function App() {
   }
   function openAddPlacePopup() {
     setIsAddPlacePopupOpen(!isAddPlacePopupOpen);
-  }
 
+  }
+  // Попап image
   function handleCardClick(card) {
-    // Попап image
     setSelectedCard(card);
   }
 
-  // Данные из API
-  useEffect(() => {
-    Promise.all([api.getInitialUserInfo(), api.getInitialUserCards()])
-      .then(([resUserInfo, resCards]) => {
-        setCurrentUser(resUserInfo);
-        setCards(resCards);
-      })
-      .catch((err) => {
-        console.log(err); // выведем ошибку в консоль
-      });
-  }, []);
+  // Попап infoTooltip
+  function openInfoTooltip() {
+    setIsInfoTooltipOpen(!isInfoTooltipOpen)
+  }
+
+
 
   function handleCardLike(card) {
     // Снова проверяем, есть ли уже лайк на этой карточке
     const isLiked = card.likes.some((i) => i._id === currentUser._id);
     // Отправляем запрос в API и получаем обновлённые данные карточки
-    api
-      .setLikes(card._id, !isLiked)
+    api.setLikes(card._id, !isLiked)
       .then((newCard) => {
         setCards((state) =>
           state.map((c) => (c._id === card._id ? newCard : c))
@@ -127,12 +137,10 @@ function App() {
     setSelectedCardToDelete(card);
     setIsConfirmPopupOpen(!isConfirmPopupOpen);
   }
-
+  // удаление карточки
   function handleCardDelete(card) {
-    // удаление карточки
     setLoad(true);
-    api
-      .deleteCards(card._id)
+    api.deleteCards(card._id)
       .then(() => {
         const filtered = cards.filter((newCard) => newCard !== card);
         setCards(filtered);
@@ -145,12 +153,10 @@ function App() {
         setLoad(false);
       });
   }
-
+  //Редактирование профиля
   function handleUpdateUser(values) {
-    //Редактирование профиля
     setLoad(true);
-    api
-      .editlUserInfo(values)
+    api.editlUserInfo(values)
       .then((res) => {
         setCurrentUser(res);
         closeAllPopups();
@@ -162,12 +168,11 @@ function App() {
         setLoad(false);
       });
   }
+  //Редактирование аватара
 
   function handleUpdateAvatar(values) {
-    //Редактирование аватара
     setLoad(true);
-    api
-      .editAvatar(values)
+    api.editAvatar(values)
       .then((res) => {
         setCurrentUser(res);
         closeAllPopups();
@@ -179,12 +184,10 @@ function App() {
         setLoad(false);
       });
   }
-
+  // Добавление карточек
   function handleAddPlaceSubmit(data) {
-    // Добавление карточек
     setLoad(true);
-    api
-      .createNewCard(data)
+    api.createNewCard(data)
       .then((data) => {
         setCards([data, ...cards]);
         closeAllPopups();
@@ -196,87 +199,75 @@ function App() {
         setLoad(false);
       });
   }
-
-  const [loggedIn, setLoggedIn] = useState(false);
-  const navigate = useNavigate();
-  const [userEmail, setUserEmail] = useState("");
-
-  // Регистрация
-  function handleRegister(values) {
-    auth
-      .register(values)
+  // Региcтрация
+  const handleRegister = useCallback((values) => {
+    auth.register(values)
       .then((res) => {
-        if (typeof res !== "undefined") {
-          setIsRegistered(true);
-          setIsInfoTooltipOpen(!isInfoTooltipOpen);
-          navigate("/singin", { replace: true });
-        } else {
-          setIsRegistered(false);
-          setIsInfoTooltipOpen(!isInfoTooltipOpen)
-        }
+        setIsRegistered(true);
+        openInfoTooltip()
+        navigate("/singin", { replace: true });
       })
       .catch((err) => {
         console.log("здесь ошибка", err); // выведем ошибку в консоль
+        setIsRegistered(false);
+        openInfoTooltip()
       })
-  }
+      .finally(setLoading(false))
+  }, [])
+
+  // Вход
+  const handleLogin = useCallback(async (values) => {
+    try {
+      const res = await auth.authorize(values.email, values.password)
+      if (!res) {
+        throw new Error('Ошибка аутентификации');
+      }
+      if (res.token) {
+        localStorage.setItem('jwt', res.token);
+        setLoggedIn(true);
+        setUserEmail(values.email);
+        navigate("/", { replace: true });
+      }
+    } catch (e) {
+      console.log(e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // Проверка токена
+  const handleTokenCheck = useCallback(() => {
+    const jwt = localStorage.getItem("jwt");
+    // проверим токен
+    if (jwt) {
+      auth.checkToken(jwt)
+        .then((res) => {
+          if (res) {
+            setLoggedIn(true);
+            navigate("/", { replace: true });
+            setUserEmail(res.data.email);
+          }
+        })
+        .catch((err) => {
+          console.log("здесь ошибка", err); // выведем ошибку в консоль
+        })
+        .finally(setLoading(false));
+    }
+  }, []);
 
   useEffect(() => {
     handleTokenCheck();
   }, []);
 
-  // Вход
 
-  const handleLogin = (values) => {
-    auth
-      .authorize(values.email, values.password)
-      .then((data) => {
-        if (data) {
-          setLoggedIn(true);
-          navigate("/users/me", { replace: true });
-        }
-      })
-      .catch((err) => console.log(err));
-  };
-
-  // Проверка токена
-  const handleTokenCheck = () => {
-    // если у пользователя есть токен в localStorage,
-    // эта функция проверит валидность токена
-    const jwt = localStorage.getItem("jwt");
-    if (jwt) {
-      // проверим токен
-      auth.checkToken(jwt).then((res) => {
-        if (res) {
-          setUserEmail(res.data.email);
-          // авторизуем пользователя
-          setLoggedIn(true);
-          navigate("/users/me", { replace: true });
-        }
-      });
-    }
-  };
-
-  const check = () => {
-    console.log(loggedIn)
-  }
-  check()
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="body">
         <div className="page">
           <Routes>
-            <Route path="/"
-              element={
-                loggedIn ? (<Navigate to="/singup" replace />) :
-                  (<Navigate to="/singin" replace />)
-              }
-            />
-            <Route path="/singup" element={<Register onAddAccount={handleRegister} />} />
-            <Route path="/singin" element={<Login handleLogin={handleLogin} />} />
-
             <Route
-              path="/users/me"
+              path="/"
               element={
                 <ProtectedRoute
                   isloggedIn={loggedIn}
@@ -298,6 +289,8 @@ function App() {
                 />
               }
             />
+            <Route path="/singup" element={<Register onAddAccount={handleRegister} />} />
+            <Route path="/singin" element={<Login handleLogin={handleLogin} />} />
           </Routes>
           <EditProfilePopup
             isOpen={isEditProfilePopupOpen}

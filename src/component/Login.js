@@ -1,8 +1,8 @@
-import React from 'react';
+import { useEffect } from "react";
 import Header from "./Header";
 import { useForm } from "../hooks/useForm";
 
-function Login({ handleLogin, navigateTo }) {
+function Login({ handleLogin }) {
 
   const { values, handleChange, setValues, isValid, setIsValid, errors, setErrors } = useForm({});
 
@@ -15,7 +15,7 @@ function Login({ handleLogin, navigateTo }) {
     setValues({ email: '', password: '' });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     setValues({});
     setErrors({});
     setIsValid(true)
@@ -33,7 +33,7 @@ function Login({ handleLogin, navigateTo }) {
           <input
             value={values.email || ''}
             onChange={handleChange}
-            className={`form-auth__item ${isValid ? "" : "form-auth__item_error"}`}
+            className={`form-auth__item ${errors?.email && "form-auth__item_error"}`}
             type="email"
             name="email"
             minLength="6"
@@ -46,7 +46,7 @@ function Login({ handleLogin, navigateTo }) {
             value={values.password || ''}
             onChange={handleChange}
             type="password"
-            className={`form-auth__item ${isValid ? "" : "form-auth__item_error"}`}
+            className={`form-auth__item ${errors?.password && "form-auth__item_error"}`}
             name="password"
             minLength="3"
             maxLength="200"

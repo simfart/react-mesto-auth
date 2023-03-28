@@ -17,6 +17,7 @@ function ConfirmPopup({ card, isOpen, onClose, onConfirm, isLoading }) {
       popupTitle="Вы уверены?"
       buttonText={isLoading ? "Удаление..." : "Да"}
       onSubmit={handleSubmit}
+      isValid={true}
     >
     </PopupWithForm>
   );

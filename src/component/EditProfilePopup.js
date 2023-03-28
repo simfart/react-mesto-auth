@@ -43,7 +43,7 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser, isLoading }) {
         onChange={handleChange}
         id="heading-input"
         type="text"
-        className={`popup__item ${isValid ? "" : "popup__item_error"}`}
+        className={`popup__item ${errors?.name && 'popup__item_error'}`}
         name="name"
         minLength="2"
         maxLength="40"
@@ -55,7 +55,7 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser, isLoading }) {
         onChange={handleChange}
         id="subheading-input"
         type="text"
-        className={`popup__item ${isValid ? "" : "popup__item_error"}`}
+        className={`popup__item ${errors?.about && 'popup__item_error'}`}
         name="about"
         minLength="2"
         maxLength="200"

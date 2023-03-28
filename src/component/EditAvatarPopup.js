@@ -36,7 +36,7 @@ function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar, isLoading }) {
       <input
         id="Avatar-input"
         type="url"
-        className={`popup__item ${isValid ? "" : "popup__item_error"}`}
+        className={`popup__item ${errors?.link && 'popup__item_error'}`}
         name="link"
         placeholder="Ссылка на картинку"
         required
